@@ -1,0 +1,8 @@
+D:\Timo\Documents\Brogramming\ReversiAI\ReversiAI\bin\Debug\ReversiAI.exe.config
+D:\Timo\Documents\Brogramming\ReversiAI\ReversiAI\bin\Debug\ReversiAI.exe
+D:\Timo\Documents\Brogramming\ReversiAI\ReversiAI\bin\Debug\ReversiAI.pdb
+D:\Timo\Documents\Brogramming\ReversiAI\ReversiAI\obj\Debug\ReversiAI.csprojResolveAssemblyReference.cache
+D:\Timo\Documents\Brogramming\ReversiAI\ReversiAI\obj\Debug\ReversiAI.Properties.Resources.resources
+D:\Timo\Documents\Brogramming\ReversiAI\ReversiAI\obj\Debug\ReversiAI.csproj.GenerateResource.Cache
+D:\Timo\Documents\Brogramming\ReversiAI\ReversiAI\obj\Debug\ReversiAI.exe
+D:\Timo\Documents\Brogramming\ReversiAI\ReversiAI\obj\Debug\ReversiAI.pdb
