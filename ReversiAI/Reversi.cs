@@ -18,22 +18,24 @@ namespace ReversiAI
         {
             // Hardcoded for now, can later add it to initialize options or input it in console
             player1_human = false;
-            player2_human = true;
-            ai1 = new HeuristicAI(board, PlayerColor.White);
-            ai2 = new HeuristicAI(board, PlayerColor.Black);
+            player2_human = false;
+            ai1 = new HeuristicAI(new DynamicHeuristic());
+            ai2 = new MinMax(new DynamicHeuristic(), 3);
+            //ai2 = new HeuristicAI(new DynamicHeuristic());
+           
             if (!player1_human) player1Move();
         }
 
         private void player1Move()
         {
             if (player1_human) return;
-            MakeMove(ai1.GetMove());
+            MakeMove(ai1.GetMove(board, PlayerColor.White));
         }
 
         private void player2Move()
         {
             if (player2_human) return;
-            MakeMove(ai2.GetMove());
+            MakeMove(ai2.GetMove(board, PlayerColor.Black));
         }
 
 

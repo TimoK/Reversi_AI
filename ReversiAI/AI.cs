@@ -9,21 +9,12 @@ namespace ReversiAI
 {
     interface AI
     {
-        Point GetMove();
+        Point GetMove(ReversiBoard board, PlayerColor color);
     }
 
     class SimpleAI : AI
     {
-        ReversiBoard board;
-        PlayerColor color;
-
-        public SimpleAI(ReversiBoard board, PlayerColor color)
-        {
-            this.board = board;
-            this.color = color;
-        }
-
-        public Point GetMove()
+        public Point GetMove(ReversiBoard board, PlayerColor color)
         {
             List<Point> boardPositions = ReversiBoard.GetBoardPositions();
             foreach (Point boardPosition in boardPositions)
@@ -34,24 +25,16 @@ namespace ReversiAI
         }
     }
 
-    /* Did not want to design a heuristic myself (beyond scope of this project) so used a heuristic from someone else
-     * Author: Kartikkukreja https://github.com/kartikkukreja
-     * Code: https://github.com/kartikkukreja/blog-codes/blob/master/src/Heuristic%20Function%20for%20Reversi%20(Othello).cpp
-     * Code ported to C# and my implementation of Reversi by me
-     * Blogpost describing the heuristic: https://kartikkukreja.wordpress.com/2013/03/30/heuristic-function-for-reversiothello/ 
-     */
     class HeuristicAI : AI
     {
-        ReversiBoard board;
-        PlayerColor color;
+        Heuristic heuristic;
 
-        public HeuristicAI(ReversiBoard board, PlayerColor color)
+        public HeuristicAI(Heuristic heuristic)
         {
-            this.board = board;
-            this.color = color;
+            this.heuristic = heuristic;
         }
 
-        public Point GetMove()
+        public Point GetMove(ReversiBoard board, PlayerColor color)
         {
             Point bestMove = new Point(0, 0);
             double bestScore = double.MinValue;
@@ -63,7 +46,7 @@ namespace ReversiAI
                 {
                     ReversiBoard boardWithMove = board.Copy();
                     boardWithMove.makeMove(boardPosition);
-                    double score = dynamic_heuristic_evaluation_function(boardWithMove, color);
+                    double score = heuristic.GetScore(boardWithMove, color);
                     if (score > bestScore)
                     {
                         bestScore = score;
@@ -73,9 +56,105 @@ namespace ReversiAI
             }
             return bestMove;
         }
+    }
+
+    class MinMax : AI
+    {
+        Heuristic heuristic;
+        int searchdepth;
+
+        public MinMax(Heuristic heuristic, int searchdepth)
+        {
+            this.heuristic = heuristic;
+            this.searchdepth = searchdepth;
+            if (searchdepth < 1) throw new ArgumentException("Searchdepth can not be smaller than 1.");
+        }
+
+        public Point GetMove(ReversiBoard board, PlayerColor color)
+        {
+            Point bestMove = new Point(0, 0);
+            double bestScore = double.MinValue;
+
+            List<Point> boardPositions = ReversiBoard.GetBoardPositions();
+            foreach (Point boardPosition in boardPositions)
+            {
+                if (board.isLegalMove(boardPosition, color))
+                {
+                    ReversiBoard boardWithMove = board.Copy();
+                    boardWithMove.makeMove(boardPosition);
+                    double score = getBoardValuation(boardWithMove, color, searchdepth - 1, false);
+                    if (score > bestScore)
+                    {
+                        bestScore = score;
+                        bestMove = boardPosition;
+                    }
+                }
+            }
+
+            return bestMove;
+        }
+
+        double getBoardValuation(ReversiBoard board, PlayerColor color, int currentSearchDepth, bool maximising)
+        {
+            if (currentSearchDepth == 0) return heuristic.GetScore(board, color);
+
+            bool minimising;
+            if (maximising) minimising = false; else minimising = true;
+
+            Point bestMove = new Point(0, 0);
+            double bestScore = double.MaxValue;
+            if(maximising) bestScore = double.MinValue;
+
+            PlayerColor currentPlayerColor = ReversiBoard.otherPlayerColor(color);
+            if (maximising) currentPlayerColor = color;
+
+            List<Point> boardPositions = ReversiBoard.GetBoardPositions();
+            foreach (Point boardPosition in boardPositions)
+            {
+                if (board.isLegalMove(boardPosition, currentPlayerColor))
+                {
+                    ReversiBoard boardWithMove = board.Copy();
+                    boardWithMove.makeMove(boardPosition);
+                    double score = getBoardValuation(boardWithMove, color, currentSearchDepth - 1, minimising);
+                    if (maximising)
+                    {
+                        if (score > bestScore)
+                        {
+                            bestScore = score;
+                            bestMove = boardPosition;
+                        }
+                    }
+                    else
+                    {
+                        if(score < bestScore)
+                        {
+                            bestScore = score;
+                            bestMove = boardPosition;
+                        }
+                    }
+                }
+            }
+            return bestScore;
+        }
+    }
 
 
-        double dynamic_heuristic_evaluation_function(ReversiBoard board, PlayerColor playerColor)
+
+
+    interface Heuristic
+    {
+        double GetScore(ReversiBoard board, PlayerColor playerColor);
+    }
+
+/* Did not want to design a heuristic myself (beyond scope of this project) so used a heuristic from someone else
+ * Author: Kartikkukreja https://github.com/kartikkukreja
+ * Code: https://github.com/kartikkukreja/blog-codes/blob/master/src/Heuristic%20Function%20for%20Reversi%20(Othello).cpp
+ * Code ported to C# and my implementation of Reversi by me
+ * Blogpost describing the heuristic: https://kartikkukreja.wordpress.com/2013/03/30/heuristic-function-for-reversiothello/ 
+ */
+    class DynamicHeuristic : Heuristic
+    {
+        public double GetScore(ReversiBoard board, PlayerColor playerColor)
         {
             PlayerColor opponentColor = ReversiBoard.otherPlayerColor(playerColor);
             BoardSquareState playerTile = ReversiBoard.getTile(playerColor);
@@ -199,5 +278,7 @@ namespace ReversiAI
             return score;
         }
     }
+
+
 
 }
