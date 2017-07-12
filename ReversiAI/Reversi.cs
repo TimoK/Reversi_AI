@@ -98,6 +98,12 @@ namespace ReversiAI
             }
         }
 
+        public int GetScore(PlayerColor color)
+        {
+            if (color == PlayerColor.White) return WhiteScore;
+            return BlackScore;
+        }
+
         public bool GameEnded
         {
             get

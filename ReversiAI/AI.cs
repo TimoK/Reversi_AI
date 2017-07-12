@@ -75,25 +75,14 @@ namespace ReversiAI
             Point bestMove = new Point(-1, -1);
             double bestScore = double.MinValue;
 
-            bool mustPause = false;
-
-            if (board.BlackScore == 39 && board.WhiteScore == 23)
-            {
-                mustPause = true;
-            }
             List<Point> boardPositions = ReversiBoard.GetBoardPositions();
             foreach (Point boardPosition in boardPositions)
             {
-                if (mustPause && boardPosition.X == 7 && boardPosition.Y == 6)
-                {
-                    int pauseHere = 2;
-                }
-
                 if (board.isLegalMove(boardPosition, color))
                 {
                     ReversiBoard boardWithMove = board.Copy();
                     boardWithMove.makeMove(boardPosition);
-                    double score = getBoardValuation(boardWithMove, color, searchdepth - 1, false);
+                    double score = getBoardValuation(boardWithMove, color, searchdepth - 1);
                     if (score >= bestScore)
                     {
                         bestScore = score;
@@ -105,19 +94,28 @@ namespace ReversiAI
             return bestMove;
         }
 
-        double getBoardValuation(ReversiBoard board, PlayerColor color, int currentSearchDepth, bool maximising)
+        double getBoardValuation(ReversiBoard board, PlayerColor optimisingColor, int currentSearchDepth)
         {
-            if (currentSearchDepth == 0) return heuristic.GetScore(board, color);
+            if (currentSearchDepth == 0) return heuristic.GetScore(board, optimisingColor);
 
-            bool minimising;
-            if (maximising) minimising = false; else minimising = true;
+            bool maximising = false;
+            if (board.CurrentPlayerColor == optimisingColor) maximising = true;
 
             Point bestMove = new Point(-1, -1);
             double bestScore = double.MaxValue;
             if(maximising) bestScore = double.MinValue;
 
-            PlayerColor currentPlayerColor = ReversiBoard.otherPlayerColor(color);
-            if (maximising) currentPlayerColor = color;
+            PlayerColor currentPlayerColor = ReversiBoard.otherPlayerColor(optimisingColor);
+            if (maximising) currentPlayerColor = optimisingColor;
+
+            if (board.GameEnded)
+            {
+                int optimisingScore = board.GetScore(optimisingColor);
+                int opponentScore = board.GetScore(ReversiBoard.otherPlayerColor(optimisingColor));
+                if (optimisingScore > opponentScore) return double.MaxValue;
+                if (opponentScore > optimisingScore) return double.MinValue;
+                return 0;
+            }
 
             List<Point> boardPositions = ReversiBoard.GetBoardPositions();
             foreach (Point boardPosition in boardPositions)
@@ -126,7 +124,7 @@ namespace ReversiAI
                 {
                     ReversiBoard boardWithMove = board.Copy();
                     boardWithMove.makeMove(boardPosition);
-                    double score = getBoardValuation(boardWithMove, color, currentSearchDepth - 1, minimising);
+                    double score = getBoardValuation(boardWithMove, optimisingColor, currentSearchDepth - 1);
                     if (maximising)
                     {
                         if (score >= bestScore)
