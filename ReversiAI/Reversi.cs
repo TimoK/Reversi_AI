@@ -19,7 +19,7 @@ namespace ReversiAI
             // Hardcoded for now, can later add it to initialize options or input it in console
             player1_human = false;
             player2_human = false;
-            ai1 = new HeuristicAI(new DynamicHeuristic());
+            ai1 = new MinMax(new DynamicHeuristic(), 2);
             ai2 = new MinMax(new DynamicHeuristic(), 3);
             //ai2 = new HeuristicAI(new DynamicHeuristic());
            
@@ -38,15 +38,35 @@ namespace ReversiAI
             MakeMove(ai2.GetMove(board, PlayerColor.Black));
         }
 
+        private void currentPlayerMove()
+        {
+            if (board.CurrentPlayerColor == PlayerColor.White) player1Move();
+            else player2Move();
+        }
+
+        public void MakeHumanMove(Point move)
+        {
+            if (board.CurrentPlayerColor == PlayerColor.White && !player1_human) return;
+            if (board.CurrentPlayerColor == PlayerColor.Black && !player2_human) return;
+            if (!board.isLegalMove(move, board.CurrentPlayerColor)) return;
+
+            MakeMove(move);
+        }
 
         public void MakeMove(Point move)
         {
             if (board.GameEnded) return;
-            if (board.GetBoardState(move) != BoardSquareState.Empty) return;
+
+            if (!board.isLegalMove(move, board.CurrentPlayerColor))
+            {
+                throw new Exception("Illegal move was made.");
+            }
             board.makeMove(move);
 
-            if (board.CurrentPlayerColor == PlayerColor.White) player1Move();
-            else player2Move();
+            if (!board.GameEnded)
+            {
+                currentPlayerMove();
+            }
         }
     }
 

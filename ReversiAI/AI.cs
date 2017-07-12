@@ -72,24 +72,35 @@ namespace ReversiAI
 
         public Point GetMove(ReversiBoard board, PlayerColor color)
         {
-            Point bestMove = new Point(0, 0);
+            Point bestMove = new Point(-1, -1);
             double bestScore = double.MinValue;
 
+            bool mustPause = false;
+
+            if (board.BlackScore == 39 && board.WhiteScore == 23)
+            {
+                mustPause = true;
+            }
             List<Point> boardPositions = ReversiBoard.GetBoardPositions();
             foreach (Point boardPosition in boardPositions)
             {
+                if (mustPause && boardPosition.X == 7 && boardPosition.Y == 6)
+                {
+                    int pauseHere = 2;
+                }
+
                 if (board.isLegalMove(boardPosition, color))
                 {
                     ReversiBoard boardWithMove = board.Copy();
                     boardWithMove.makeMove(boardPosition);
                     double score = getBoardValuation(boardWithMove, color, searchdepth - 1, false);
-                    if (score > bestScore)
+                    if (score >= bestScore)
                     {
                         bestScore = score;
                         bestMove = boardPosition;
                     }
                 }
-            }
+            }        
 
             return bestMove;
         }
@@ -101,7 +112,7 @@ namespace ReversiAI
             bool minimising;
             if (maximising) minimising = false; else minimising = true;
 
-            Point bestMove = new Point(0, 0);
+            Point bestMove = new Point(-1, -1);
             double bestScore = double.MaxValue;
             if(maximising) bestScore = double.MinValue;
 
@@ -118,7 +129,7 @@ namespace ReversiAI
                     double score = getBoardValuation(boardWithMove, color, currentSearchDepth - 1, minimising);
                     if (maximising)
                     {
-                        if (score > bestScore)
+                        if (score >= bestScore)
                         {
                             bestScore = score;
                             bestMove = boardPosition;
@@ -126,7 +137,7 @@ namespace ReversiAI
                     }
                     else
                     {
-                        if(score < bestScore)
+                        if(score <= bestScore)
                         {
                             bestScore = score;
                             bestMove = boardPosition;
@@ -134,6 +145,7 @@ namespace ReversiAI
                     }
                 }
             }
+
             return bestScore;
         }
     }

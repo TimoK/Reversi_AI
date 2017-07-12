@@ -19,17 +19,21 @@ namespace ReversiAI
         {
             this.game = game;
             this.board = game.board;
+            boardLength = tileLength * ReversiBoard.boardSize;
+
+            this.Size = new Size(offset.X + boardLength + 100, offset.Y + boardLength + 100);
             InitializeComponent();
+
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(OnClick);
         }
 
         Point offset = new Point(20, 50);
         int tileLength = 50;
+        int boardLength;
 
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            int boardLength = tileLength * ReversiBoard.boardSize;
 
             Font drawFont = new System.Drawing.Font("Arial", 16);
             g.DrawString("Red score: " + board.WhiteScore, drawFont, Brushes.Black, new Point(0, 0));
@@ -84,7 +88,7 @@ namespace ReversiAI
 
             if (!(x < offset.X || y < offset.Y || x >= tileLength * ReversiBoard.boardSize + offset.X || y >= tileLength * ReversiBoard.boardSize + offset.Y))
             {
-                game.MakeMove(new Point((x - offset.X) / tileLength, (y - offset.Y) / tileLength));
+                game.MakeHumanMove(new Point((x - offset.X) / tileLength, (y - offset.Y) / tileLength));
             }
             Invalidate();
             base.OnClick(e);
