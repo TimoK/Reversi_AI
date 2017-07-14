@@ -47,7 +47,7 @@ namespace ReversiAI
                     ReversiBoard boardWithMove = board.Copy();
                     boardWithMove.makeMove(boardPosition);
                     double score = heuristic.GetScore(boardWithMove, color);
-                    if (score > bestScore)
+                    if (score >= bestScore)
                     {
                         bestScore = score;
                         bestMove = boardPosition;
@@ -58,6 +58,7 @@ namespace ReversiAI
         }
     }
 
+    // Implementation of the MinMax algorithm with alpha beta pruning
     class MinMax : AI
     {
         Heuristic heuristic;
@@ -74,6 +75,7 @@ namespace ReversiAI
         {
             Point bestMove = new Point(-1, -1);
             double bestScore = double.MinValue;
+            double alpha = double.MinValue;
 
             List<Point> boardPositions = ReversiBoard.GetBoardPositions();
             foreach (Point boardPosition in boardPositions)
@@ -82,19 +84,21 @@ namespace ReversiAI
                 {
                     ReversiBoard boardWithMove = board.Copy();
                     boardWithMove.makeMove(boardPosition);
-                    double score = getBoardValuation(boardWithMove, color, searchdepth - 1);
+                    double score = getBoardValuation(boardWithMove, color, searchdepth - 1, alpha, double.MaxValue);
                     if (score >= bestScore)
                     {
                         bestScore = score;
                         bestMove = boardPosition;
                     }
+                    if (score > alpha) alpha = score;
                 }
             }        
+
 
             return bestMove;
         }
 
-        double getBoardValuation(ReversiBoard board, PlayerColor optimisingColor, int currentSearchDepth)
+        double getBoardValuation(ReversiBoard board, PlayerColor optimisingColor, int currentSearchDepth, double alpha, double beta)
         {
             if (currentSearchDepth == 0) return heuristic.GetScore(board, optimisingColor);
 
@@ -124,7 +128,7 @@ namespace ReversiAI
                 {
                     ReversiBoard boardWithMove = board.Copy();
                     boardWithMove.makeMove(boardPosition);
-                    double score = getBoardValuation(boardWithMove, optimisingColor, currentSearchDepth - 1);
+                    double score = getBoardValuation(boardWithMove, optimisingColor, currentSearchDepth - 1, alpha, beta);
                     if (maximising)
                     {
                         if (score >= bestScore)
@@ -132,6 +136,7 @@ namespace ReversiAI
                             bestScore = score;
                             bestMove = boardPosition;
                         }
+                        if (score > alpha) alpha = score;
                     }
                     else
                     {
@@ -140,7 +145,13 @@ namespace ReversiAI
                             bestScore = score;
                             bestMove = boardPosition;
                         }
+                        if (score < beta) beta = score;
                     }
+                    // Cut-off point for alpha-beta pruning
+                    // In this part of the searchtree (towards the root) we have seen an option for the opponent (beta) that is worth less
+                    // than an option for the player (alpha). An option down this search tree will either be worth more than beta so discarded by the opponent,
+                    // (and/)or it will be worth less than alpha so be discarded by the player
+                    if (beta < alpha) break;
                 }
             }
 

@@ -20,7 +20,7 @@ namespace ReversiAI
             player1_human = false;
             player2_human = false;
             ai1 = new MinMax(new DynamicHeuristic(), 2);
-            ai2 = new MinMax(new DynamicHeuristic(), 3);
+            ai2 = new MinMax(new DynamicHeuristic(), 1);
             //ai2 = new HeuristicAI(new DynamicHeuristic());
            
             if (!player1_human) player1Move();

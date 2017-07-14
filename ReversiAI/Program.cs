@@ -19,7 +19,6 @@ namespace ReversiAI
 
             ReversiGame game = new ReversiGame();
 
-
             Application.Run(new ReversiVisualiser(game));
         }
     }
