@@ -58,16 +58,18 @@ namespace ReversiAI
         }
     }
 
-    // Implementation of the MinMax algorithm with alpha beta pruning
+    // Implementation of the MinMax algorithm with optional alpha beta pruning
     class MinMax : AI
     {
         Heuristic heuristic;
         int searchdepth;
+        bool alphaBetaPruning;
 
-        public MinMax(Heuristic heuristic, int searchdepth)
+        public MinMax(Heuristic heuristic, int searchdepth, bool alphaBetaPruning)
         {
             this.heuristic = heuristic;
             this.searchdepth = searchdepth;
+            this.alphaBetaPruning = alphaBetaPruning;
             if (searchdepth < 1) throw new ArgumentException("Searchdepth can not be smaller than 1.");
         }
 
@@ -151,7 +153,7 @@ namespace ReversiAI
                     // In this part of the searchtree (towards the root) we have seen an option for the opponent (beta) that is worth less
                     // than an option for the player (alpha). An option down this search tree will either be worth more than beta so discarded by the opponent,
                     // (and/)or it will be worth less than alpha so be discarded by the player
-                    if (beta < alpha) break;
+                    if (alphaBetaPruning && beta < alpha) break;
                 }
             }
 
@@ -175,6 +177,36 @@ namespace ReversiAI
  */
     class DynamicHeuristic : Heuristic
     {
+        int[,] boardValuation;
+        double[] scoreWeights;
+
+        // Use the board valuation and score weights by Kartikkukreja as default
+        double[] defaultScoreWeights = { 10, 801.724, 382.026, 78.922, 74.396, 10 };
+        int[] defaultTileValuation = { 20, -3, 11, 8, -7, -4, 1, 2, 2, -3 };
+
+        public DynamicHeuristic(int[] mirroredTileValuation = null, double[] scoreWeights = null)
+        {
+            if (mirroredTileValuation == null) mirroredTileValuation = defaultTileValuation;
+            boardValuation = getBoardValuation(mirroredTileValuation);
+
+            if (scoreWeights == null) scoreWeights = defaultScoreWeights;
+            this.scoreWeights = scoreWeights;
+        }
+
+        public void WriteArray(int[,] array)
+        {
+            for (int y = 0; y < array.GetLength(0); ++y)
+            {
+                for (int x = 0; x < array.GetLength(1); ++x)
+                {
+                    Console.Write(array[x, y] + " ");
+                }
+                Console.WriteLine();
+            }
+                 
+        }
+
+
         public double GetScore(ReversiBoard board, PlayerColor playerColor)
         {
             PlayerColor opponentColor = ReversiBoard.otherPlayerColor(playerColor);
@@ -186,25 +218,17 @@ namespace ReversiAI
             int my_tiles = 0, opp_tiles = 0, my_front_tiles = 0, opp_front_tiles = 0;
             double p = 0, c = 0, l = 0, m = 0, f = 0, d = 0;
 
-            int[,] V = { {20, -3, 11, 8, 8, 11, -3, 20},
-                           {-3, -7, -4, 1, 1, -4, -7, -3},
-                           {11, -4, 2, 2, 2, 2, -4, 11},
-                           {8, 1, 2, -3, -3, 2, 1, 8},
-                           {8, 1, 2, -3, -3, 2, 1, 8},
-                           {11, -4, 2, 2, 2, 2, -4, 11},
-                           {-3, -7, -4, 1, 1, -4, -7, -3},
-                           {20, -3, 11, 8, 8, 11, -3, 20}};
             // Piece difference, frontier disks and disk squares
             foreach (Point location in boardLocations)
             {
                 if (board.GetBoardState(location) == playerTile)
                 {
-                    d += V[location.X, location.Y];
+                    d += boardValuation[location.X, location.Y];
                     my_tiles++;
                 }
                 else if (board.GetBoardState(location) == opponentTile)
                 {
-                    d -= V[location.X, location.Y];
+                    d -= boardValuation[location.X, location.Y];
                     opp_tiles++;
                 }
                 if (board.GetBoardState(location) != BoardSquareState.Empty)
@@ -295,8 +319,44 @@ namespace ReversiAI
             else m = 0;
 
             // final weighted score
-            double score = (10 * p) + (801.724 * c) + (382.026 * l) + (78.922 * m) + (74.396 * f) + (10 * d);
+            double score = (scoreWeights[0] * p) + (scoreWeights[1] * c) + (scoreWeights[2] * l)
+                + (scoreWeights[3] * m) + (scoreWeights[4] * f) + (scoreWeights[5] * d);
             return score;
+        }
+
+        private int[,] getBoardValuation(int[] mirroredTileValuations)
+        {
+            int[,] boardValuation = new int[ReversiBoard.boardSize, ReversiBoard.boardSize];
+            int mirroredTileValuationsIndex = 0;
+            int halfSize = ReversiBoard.boardSize / 2;
+
+            if (mirroredTileValuations.Length != ((halfSize + 1) * halfSize) / 2)
+            {
+                Console.WriteLine(((ReversiBoard.boardSize + 1) * ReversiBoard.boardSize) / 2);
+                throw new ArgumentException("Not the right amount of valuations to fill the board.");
+            }
+
+            // Fill in one quarter of the board
+            for (int x = 0; x < 4; ++x)
+            {
+                for (int y = x; y < 4; ++y)
+                {
+                    boardValuation[x, y] = mirroredTileValuations[mirroredTileValuationsIndex];
+                    boardValuation[y, x] = mirroredTileValuations[mirroredTileValuationsIndex];
+                    ++mirroredTileValuationsIndex;
+                }
+            }
+            // Fill in the rest of the board
+            for (int x = 0; x < 4; ++x)
+            {
+                for (int y = 0; y < 4; ++y)
+                {
+                    boardValuation[7 - x, y] = boardValuation[x, y];
+                    boardValuation[x, 7 - y] = boardValuation[x, y];
+                    boardValuation[7 - x, 7 - y] = boardValuation[x, y];
+                }
+            }
+            return boardValuation;
         }
     }
 
