@@ -47,6 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Evolutionary Algorithm\Crossover.cs" />
+    <Compile Include="Evolutionary Algorithm\GeneticAlgorithm.cs" />
+    <Compile Include="Evolutionary Algorithm\Mutatre.cs" />
+    <Compile Include="Evolutionary Algorithm\Selecter.cs" />
     <Compile Include="Visualiser.cs">
       <SubType>Form</SubType>
     </Compile>

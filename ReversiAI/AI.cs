@@ -172,19 +172,19 @@ namespace ReversiAI
 /* Did not want to design a heuristic myself (beyond scope of this project) so used a heuristic from someone else
  * Author: Kartikkukreja https://github.com/kartikkukreja
  * Code: https://github.com/kartikkukreja/blog-codes/blob/master/src/Heuristic%20Function%20for%20Reversi%20(Othello).cpp
- * Code ported to C# and my implementation of Reversi by me
+ * Code ported to C# and my implementation of Reversi
  * Blogpost describing the heuristic: https://kartikkukreja.wordpress.com/2013/03/30/heuristic-function-for-reversiothello/ 
  */
     class DynamicHeuristic : Heuristic
     {
-        int[,] boardValuation;
+        double[,] boardValuation;
         double[] scoreWeights;
 
         // Use the board valuation and score weights by Kartikkukreja as default
         double[] defaultScoreWeights = { 10, 801.724, 382.026, 78.922, 74.396, 10 };
-        int[] defaultTileValuation = { 20, -3, 11, 8, -7, -4, 1, 2, 2, -3 };
+        double[] defaultTileValuation = { 20, -3, 11, 8, -7, -4, 1, 2, 2, -3 };
 
-        public DynamicHeuristic(int[] mirroredTileValuation = null, double[] scoreWeights = null)
+        public DynamicHeuristic(double[] mirroredTileValuation = null, double[] scoreWeights = null)
         {
             if (mirroredTileValuation == null) mirroredTileValuation = defaultTileValuation;
             boardValuation = getBoardValuation(mirroredTileValuation);
@@ -324,9 +324,9 @@ namespace ReversiAI
             return score;
         }
 
-        private int[,] getBoardValuation(int[] mirroredTileValuations)
+        private double[,] getBoardValuation(double[] mirroredTileValuations)
         {
-            int[,] boardValuation = new int[ReversiBoard.boardSize, ReversiBoard.boardSize];
+            double[,] boardValuation = new double[ReversiBoard.boardSize, ReversiBoard.boardSize];
             int mirroredTileValuationsIndex = 0;
             int halfSize = ReversiBoard.boardSize / 2;
 
