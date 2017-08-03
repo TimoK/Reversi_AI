@@ -31,6 +31,8 @@ namespace ReversiAI.Evolutionary_Algorithm
 
             for (int generationNum = 0; generationNum < numGenerations; ++generationNum)
             {
+                Console.WriteLine(generationNum);
+
                 List<Solution> selection = selecter.Select(currentPopulation, selectionSize, optimisationOption);
                 List<Solution> nextPopulation = new List<Solution>();
                 for (int i = 0; i < populationSize / 2; ++i)
@@ -81,7 +83,7 @@ namespace ReversiAI.Evolutionary_Algorithm
     
     public enum OptimisationOption { TileValuations, ScoreWeights }
 
-    class Solution
+    public class Solution
     {
         public Solution()
         {
@@ -93,7 +95,7 @@ namespace ReversiAI.Evolutionary_Algorithm
             foreach (double value in toCopy.values) values.Add(value);
         }
 
-        public List<double> values;
+        public List<double> values = new List<double>();
     }
 
 
@@ -113,6 +115,11 @@ namespace ReversiAI.Evolutionary_Algorithm
         public int Next(int i)
         {
             return randomGenerator.Next(i);
+        }
+
+        public double NextDouble()
+        {
+            return randomGenerator.NextDouble();
         }
 
         public static RandomGenerator Instance

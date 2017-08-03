@@ -7,12 +7,12 @@ using System.Drawing;
 
 namespace ReversiAI
 {
-    interface AI
+    public interface AI
     {
         Point GetMove(ReversiBoard board, PlayerColor color);
     }
 
-    class SimpleAI : AI
+    public class SimpleAI : AI
     {
         public Point GetMove(ReversiBoard board, PlayerColor color)
         {
@@ -25,7 +25,7 @@ namespace ReversiAI
         }
     }
 
-    class HeuristicAI : AI
+    public class HeuristicAI : AI
     {
         Heuristic heuristic;
 
@@ -59,7 +59,7 @@ namespace ReversiAI
     }
 
     // Implementation of the MinMax algorithm with optional alpha beta pruning
-    class MinMax : AI
+    public class MinMax : AI
     {
         Heuristic heuristic;
         int searchdepth;
@@ -164,7 +164,7 @@ namespace ReversiAI
 
 
 
-    interface Heuristic
+    public interface Heuristic
     {
         double GetScore(ReversiBoard board, PlayerColor playerColor);
     }
@@ -175,7 +175,7 @@ namespace ReversiAI
  * Code ported to C# and my implementation of Reversi
  * Blogpost describing the heuristic: https://kartikkukreja.wordpress.com/2013/03/30/heuristic-function-for-reversiothello/ 
  */
-    class DynamicHeuristic : Heuristic
+    public class DynamicHeuristic : Heuristic
     {
         double[,] boardValuation;
         double[] scoreWeights;
