@@ -16,13 +16,13 @@ namespace ReversiAI
 
         public ReversiGame()
         {
-            double[] evoScoreWeights = {8.38040133598174, 678.50323307731, 429.497072167285, 107.307147552877, 77.6131903161, 364, 9.07864989119268};
+            double[] evoScoreWeights = { 9.9464677320544, 663.725223387073, 397.310830727661, 18.3461926578452, 41.8220717677244, 100.265637983259 };
 
             // Hardcoded for now, can later add it to initialize options or input it in console
             player1_human = false;
             player2_human = false;
-            ai1 = new MinMax(new DynamicHeuristic(), 2, true);
-            ai2 = new MinMax(new DynamicHeuristic(scoreWeights: evoScoreWeights), 2, true);
+            ai1 = new MinMax(new DynamicHeuristic(), 3, true);
+            ai2 = new MinMax(new DynamicHeuristic(scoreWeights: evoScoreWeights), 3, true);
            
             if (!player1_human) player1Move();
         }

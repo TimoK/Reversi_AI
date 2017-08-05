@@ -28,13 +28,24 @@ namespace ReversiAI
             Application.Run(new ReversiVisualiser(game));
         }
 
-        static void RunGeneticAlgorithm()
+        static void RunGA()
         {
             GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(new PercentMutater(0.2), new TournamentSelecter(), new UniformCrossover(), OptimisationOption.ScoreWeights);
 
             Solution bestSolution = geneticAlgorithm.performGA();
-            foreach (double value in bestSolution.values) Console.Write(value + " ");
-            Console.WriteLine();
+
+            bool firstValue = true;
+            Console.Write("{");
+            foreach (double value in bestSolution.values)
+            {
+                if (!firstValue)
+                {
+                    Console.Write(", ");
+                }
+                else firstValue = false;
+                Console.Write(value.ToString().Replace(',', '.'));
+            } 
+            Console.WriteLine("}");
             Console.ReadLine();
         }
     }

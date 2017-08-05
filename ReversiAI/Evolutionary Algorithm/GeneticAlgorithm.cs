@@ -10,7 +10,7 @@ namespace ReversiAI.Evolutionary_Algorithm
     {
         public static int populationSize = 128;
         public static int selectionSize = 32;
-        public static int numGenerations = 50;
+        public static int numGenerations = 30;
 
         Mutater mutater;
         Selecter selecter;
@@ -35,14 +35,14 @@ namespace ReversiAI.Evolutionary_Algorithm
 
                 List<Solution> selection = selecter.Select(currentPopulation, selectionSize, optimisationOption);
                 List<Solution> nextPopulation = new List<Solution>();
-                for (int i = 0; i < populationSize / 2; ++i)
+
+                foreach (Solution solution in selection) nextPopulation.Add(solution);
+                for (int i = 0; i < (populationSize - selectionSize) / 2; ++i)
                 {
                     Solution randomSelectedSolution = selection[RandomGenerator.Instance.Next(selectionSize)];
                     Solution mutatedSolution = mutater.Mutate(randomSelectedSolution);
                     nextPopulation.Add(mutatedSolution);
-                }
-                for (int i = 0; i < populationSize / 2; ++i)
-                {
+
                     Solution randomSelectedSolution1 = selection[RandomGenerator.Instance.Next(selectionSize)];
                     Solution randomSelectedSolution2 = selection[RandomGenerator.Instance.Next(selectionSize)];
                     Solution crossedSolution = crossover.Crossover(randomSelectedSolution1, randomSelectedSolution2);
@@ -52,18 +52,19 @@ namespace ReversiAI.Evolutionary_Algorithm
             }
             
             // Select the very best solution using our selection method, returning a list of size one
-            List<Solution> finalSolutionList = selecter.Select(currentPopulation, 1, optimisationOption);
+            List<Solution> finalSolutionList = selecter.Select(currentPopulation, 2, optimisationOption);
             return finalSolutionList[0];
         }
 
         private List<Solution> getInitialPopulation()
         {
             List<Solution> initialPopulation = new List<Solution>();
-            for (int i = 0; i < populationSize; ++i) initialPopulation.Add(getInitialSolution());
+            for (int i = 0; i < populationSize / 2; ++i) initialPopulation.Add(getOriginalSolution());
+            for (int i = 0; i < populationSize / 2; ++i) initialPopulation.Add(getRandomSolution());
             return initialPopulation;
         }
 
-        private Solution getInitialSolution()
+        private Solution getOriginalSolution()
         {
             Solution solution = new Solution();
 
@@ -78,6 +79,18 @@ namespace ReversiAI.Evolutionary_Algorithm
                 foreach (double scoreWeight in scoreWeights) solution.values.Add(scoreWeight);
             }
             return solution;
+        }
+
+        private Solution getRandomSolution()
+        {
+            Solution randomSolution = new Solution();
+
+            int doublesInSolution = 0;
+            if (optimisationOption == OptimisationOption.TileValuations) doublesInSolution = 10;
+            if (optimisationOption == OptimisationOption.ScoreWeights) doublesInSolution = 6;
+            for (int i = 0; i < doublesInSolution; ++i) randomSolution.values.Add(RandomGenerator.Instance.NextDouble() * 100);
+
+            return randomSolution;
         }
     }
     
